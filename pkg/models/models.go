@@ -10,6 +10,7 @@ type Task struct {
 	Text       string	`json:"text"`
 	Deadline   time.Time	`json:"deadline"`
 	CategoryID string	`json:"categoryId"`
+	Done		bool `json:"done"`
 }
 
 // type Store struct{

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"guthub.com/iribuda/todo-api-go/pkg/models"
 )
 
@@ -15,8 +16,23 @@ func NewRepository(db *sql.DB) *TaskRepositoryImpl{
 }
 
 func (tr *TaskRepositoryImpl) GetTasks() ([]*models.Task, error){
-	return nil, nil
+	tasks := make([]*models.Task, 0)
+	rows, err := tr.db.Query("SELECT * FROM task")
+	if (err != nil){
+		return nil, fmt.Errorf("all tasks: %v", err)
+	}
+	defer rows.Close()
+	for rows.Next(){
+		t, err := scanRowsIntoTask(rows)
+		if err != nil {
+			return nil, err 
+		}
+		tasks = append(tasks, t)
+	}
+
+	return tasks, nil
 }
+
 func (tr *TaskRepositoryImpl) GetTaskByID(id int)(*models.Task, error){
 	return nil, nil
 }
@@ -31,4 +47,20 @@ func (tr *TaskRepositoryImpl) CreateTask(models.Task) error{
 }
 func (tr *TaskRepositoryImpl) DeleteTask(models.Task) error{
 	return nil
+}
+
+func scanRowsIntoTask(rows *sql.Rows)(*models.Task, error){
+	task := new(models.Task)
+	err := rows.Scan(
+		&task.TaskID,
+		&task.Title,
+		&task.Text,
+		&task.Deadline,
+		&task.CategoryID,
+		&task.Done,
+	)
+	if err != nil{
+		return nil, err
+	}
+	return task, nil
 }
