@@ -7,14 +7,15 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"guthub.com/iribuda/todo-api-go/pkg/models"
 	"guthub.com/iribuda/todo-api-go/pkg/utils"
 )
 
 type TaskController struct{
-	repository TaskRepository
+	repository models.TaskRepository
 }
 
-func NewController(repository TaskRepository) *TaskController{
+func NewController(repository models.TaskRepository) *TaskController{
 	return &TaskController{repository: repository}
 }
 
@@ -61,7 +62,7 @@ func (tc *TaskController) handleUpdateTask(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var taskDTO TaskDTO
+	var taskDTO models.TaskDTO
 	if err := utils.ParseJSON(r, &taskDTO); err != nil{
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -79,7 +80,7 @@ func (tc *TaskController) handleUpdateTask(w http.ResponseWriter, r *http.Reques
 }
 
 func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Request) {
-	var taskDTO TaskDTO
+	var taskDTO models.TaskDTO
 	if err := utils.ParseJSON(r, &taskDTO); err != nil{
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

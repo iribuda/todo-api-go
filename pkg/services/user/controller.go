@@ -6,15 +6,17 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"guthub.com/iribuda/todo-api-go/pkg/configs"
+	"guthub.com/iribuda/todo-api-go/pkg/models"
 	"guthub.com/iribuda/todo-api-go/pkg/services/auth"
 	"guthub.com/iribuda/todo-api-go/pkg/utils"
 )
 
 type UserController struct{
-	repository UserRepository
+	repository models.UserRepository
 }
 
-func NewController(repository UserRepository) *UserController{
+func NewController(repository models.UserRepository) *UserController{
 	return &UserController{repository: repository}
 }
 
@@ -24,7 +26,7 @@ func (uc *UserController) RegisterRoutes(router *mux.Router){
 }
 
 func (uc *UserController) handleLogin(w http.ResponseWriter, r *http.Request) {
-	var user LoginUserDTO
+	var user models.LoginUserDTO
 	if err := utils.ParseJSON(r, &user); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -47,11 +49,18 @@ func (uc *UserController) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, user)
+	secret := []byte(configs.Envs.JWTSecret)
+	token, err := auth.CreateJWT(secret, u.UserID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
 }
 
 func (uc *UserController) handleRegister(w http.ResponseWriter, r *http.Request) {
-	var user RegisterUserDTO
+	var user models.RegisterUserDTO
 	if err := utils.ParseJSON(r, &user); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -77,7 +86,7 @@ func (uc *UserController) handleRegister(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = uc.repository.CreateUser(User{
+	err = uc.repository.CreateUser(models.User{
 		Username:  user.Username,
 		Email:     user.Email,
 		Password:  hashedPassword,

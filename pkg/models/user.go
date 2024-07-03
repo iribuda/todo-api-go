@@ -1,4 +1,4 @@
-package user
+package models
 
 type RegisterUserDTO struct{
 	Username string `json:"username" validate:"required"`

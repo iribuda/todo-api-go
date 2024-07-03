@@ -3,6 +3,8 @@ package user
 import (
 	"database/sql"
 	"fmt"
+
+	"guthub.com/iribuda/todo-api-go/pkg/models"
 )
 
 type UserRepositoryImpl struct{
@@ -13,7 +15,7 @@ func NewRepository(db *sql.DB) *UserRepositoryImpl{
 	return &UserRepositoryImpl{db: db}
 }
 
-func (ur *UserRepositoryImpl) GetUserByEmail(email string) (*User, error){
+func (ur *UserRepositoryImpl) GetUserByEmail(email string) (*models.User, error){
 	// row := ur.db.QueryRow("SELECT * FROM user WHERE email = ?", email)
 
 	rows, err := ur.db.Query("SELECT * FROM `user` WHERE email = ?", email)
@@ -27,7 +29,7 @@ func (ur *UserRepositoryImpl) GetUserByEmail(email string) (*User, error){
 	// 	return nil, err
 	// }
 
-	u := new(User)
+	u := new(models.User)
 	for rows.Next() {
 		u, err = scanRowIntoUser(rows)
 		if err != nil {
@@ -45,11 +47,11 @@ func (ur *UserRepositoryImpl) GetUserByEmail(email string) (*User, error){
 
 	return u, nil
 }
-func (ur *UserRepositoryImpl) GetUserByID(id int) (*User, error){
+func (ur *UserRepositoryImpl) GetUserByID(id int) (*models.User, error){
 	return nil, nil
 
 }
-func (ur *UserRepositoryImpl) CreateUser(user User) error{
+func (ur *UserRepositoryImpl) CreateUser(user models.User) error{
 	_, err := ur.db.Exec("INSERT INTO user (username, email, password) VALUES (?, ?, ?)", user.Username, user.Email, user.Password)
 	if err != nil {
 		return err
@@ -66,8 +68,8 @@ func (ur *UserRepositoryImpl) CreateUser(user User) error{
 //     return user, nil
 // }
 
-func scanRowIntoUser(rows *sql.Rows)(*User, error){
-		user := new(User)
+func scanRowIntoUser(rows *sql.Rows)(*models.User, error){
+		user := new(models.User)
 		err := rows.Scan(
 			&user.UserID,
 			&user.Username,
