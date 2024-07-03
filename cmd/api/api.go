@@ -2,11 +2,12 @@ package api
 
 import (
 	"database/sql"
-	"net/http"
 	"log"
+	"net/http"
+
 	"github.com/gorilla/mux"
-	"guthub.com/iribuda/todo-api-go/pkg/controllers"
-	"guthub.com/iribuda/todo-api-go/pkg/repositories"
+	"guthub.com/iribuda/todo-api-go/pkg/services/task"
+	"guthub.com/iribuda/todo-api-go/pkg/services/user"
 )
 
 // Typ für Kapselung der Serveradresse und des Zeigers auf eine Datenbankverbindung
@@ -27,8 +28,12 @@ func NewAPIServer(addr string, db *sql.DB) *APIServer{
 func (s *APIServer) Run() error{
 	router := mux.NewRouter()
 
-	taskRepository := repositories.NewRepository(s.db)
-	taskController := controllers.NewController(taskRepository)
+	userRepository := user.NewRepository(s.db)
+	userController := user.NewController(userRepository)
+	userController.RegisterRoutes(router)
+
+	taskRepository := task.NewRepository(s.db)
+	taskController := task.NewController(taskRepository)
 	taskController.RegisterRoutes(router)
 
 	log.Println("Listening on", s.addr)

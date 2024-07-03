@@ -1,9 +1,8 @@
-package repositories
+package task
 
 import (
 	"database/sql"
 	"fmt"
-	"guthub.com/iribuda/todo-api-go/pkg/models"
 )
 
 // Implementierung der TaskRepository-Schnittstelle
@@ -16,8 +15,8 @@ func NewRepository(db *sql.DB) *TaskRepositoryImpl{
 	return &TaskRepositoryImpl{db: db}
 }
 
-func (tr *TaskRepositoryImpl) GetTasks() ([]*models.Task, error){
-	tasks := make([]*models.Task, 0)
+func (tr *TaskRepositoryImpl) GetTasks() ([]*Task, error){
+	tasks := make([]*Task, 0)
 	rows, err := tr.db.Query("SELECT * FROM task")
 	if (err != nil){
 		return nil, fmt.Errorf("all tasks: %v", err)
@@ -34,13 +33,13 @@ func (tr *TaskRepositoryImpl) GetTasks() ([]*models.Task, error){
 	return tasks, nil
 }
 
-func (tr *TaskRepositoryImpl) GetTaskByID(id int)(*models.Task, error){
+func (tr *TaskRepositoryImpl) GetTaskByID(id int)(*Task, error){
 	rows, err := tr.db.Query("SELECT * FROM task WHERE taskId = ?", id)
 	if err != nil {
 		return nil, err
 	}
 
-	t := new(models.Task)
+	t := new(Task)
 	defer rows.Close()
 
 	for rows.Next(){
@@ -58,11 +57,11 @@ func (tr *TaskRepositoryImpl) GetTaskByID(id int)(*models.Task, error){
 
 	return t, nil
 }
-func (tr *TaskRepositoryImpl) GetTasksByUser(id int)([]*models.Task, error){
+func (tr *TaskRepositoryImpl) GetTasksByUser(id int)([]*Task, error){
 	return nil, nil
 }
 
-func (tr *TaskRepositoryImpl) UpdateTask(task *models.Task) error{
+func (tr *TaskRepositoryImpl) UpdateTask(task *Task) error{
 	_, err := tr.db.Exec("UPDATE task SET title = ?, text = ?, deadline = ?, categoryId = ?, done = ? WHERE taskId = ?", 
 		task.Title, task.Text, task.Deadline, task.CategoryID, task.Done, task.TaskID)
 	if err != nil{
@@ -71,7 +70,7 @@ func (tr *TaskRepositoryImpl) UpdateTask(task *models.Task) error{
 	return nil
 }
 
-func (tr *TaskRepositoryImpl) CreateTask(task *models.Task) error{
+func (tr *TaskRepositoryImpl) CreateTask(task *Task) error{
 	_, err := tr.db.Exec("INSERT INTO task (title, text, deadline, categoryId) VALUES (?, ?, ?, ?)",
 		task.Title, task.Text, task.Deadline, task.CategoryID)
 	if err != nil{
@@ -89,8 +88,8 @@ func (tr *TaskRepositoryImpl) DeleteTask(id int) error{
 }
 
 // Hilf-Funktion für Aufrufen der Aufgaben aus sql-ResultSet
-func scanRowsIntoTask(rows *sql.Rows)(*models.Task, error){
-	task := new(models.Task)
+func scanRowsIntoTask(rows *sql.Rows)(*Task, error){
+	task := new(Task)
 	err := rows.Scan(
 		&task.TaskID,
 		&task.Title,
