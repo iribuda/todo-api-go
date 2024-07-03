@@ -35,6 +35,24 @@ func (tr *TaskRepositoryImpl) GetTasks() ([]*models.Task, error){
 	return tasks, nil
 }
 
+func (tr *TaskRepositoryImpl) GetTasksByUser(userID int) ([]*models.Task, error){
+	tasks := make([]*models.Task, 0)
+	rows, err := tr.db.Query("SELECT t.* FROM task t JOIN user_task u ON u.taskId = t.taskId WHERE u.userId = ?", userID)
+	if (err != nil){
+		return nil, fmt.Errorf("all tasks by user: %v", err)
+	}
+	defer rows.Close()
+	for rows.Next(){
+		t, err := scanRowsIntoTask(rows)
+		if err != nil {
+			return nil, err 
+		}
+		tasks = append(tasks, t)
+	}
+
+	return tasks, nil
+}
+
 func (tr *TaskRepositoryImpl) GetTaskByID(id int)(*models.Task, error){
 	rows, err := tr.db.Query("SELECT * FROM task WHERE taskId = ?", id)
 	if err != nil {
@@ -58,9 +76,6 @@ func (tr *TaskRepositoryImpl) GetTaskByID(id int)(*models.Task, error){
 	}
 
 	return t, nil
-}
-func (tr *TaskRepositoryImpl) GetTasksByUser(id int)([]*models.Task, error){
-	return nil, nil
 }
 
 func (tr *TaskRepositoryImpl) UpdateTask(task *models.Task) error{

@@ -33,7 +33,7 @@ func (s *APIServer) Run() error{
 	userController.RegisterRoutes(router)
 
 	taskRepository := task.NewRepository(s.db)
-	taskController := task.NewController(taskRepository)
+	taskController := task.NewController(taskRepository, userRepository)
 	taskController.RegisterRoutes(router)
 
 	log.Println("Listening on", s.addr)

@@ -46,12 +46,16 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, repository models.UserRepository)
 			return
 		}
 
+		log.Printf("UserID from token: %d", userID)
+
 		u, err := repository.GetUserByID(userID)
 		if err != nil{
 			log.Printf("failed to get user by id: %v", err)
 			utils.WriteError(w, http.StatusForbidden, fmt.Errorf("permission denied"))
 			return
 		}
+
+		log.Printf("User with this ID: %v", u.UserID)
 
 		// Benutzer wird dem Context hinzugefügt
 		currentContext := r.Context()
@@ -67,7 +71,7 @@ func CreateJWT(secret []byte, userID int)(string, error){
 	expiration := time.Second * time.Duration(configs.Envs.JWTExpirationInSeconds)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": strconv.Itoa(userID),
+		"userID": strconv.Itoa(int(userID)),
 		"expiresAt": time.Now().Add(expiration).Unix(),
 	})
 

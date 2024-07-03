@@ -8,19 +8,21 @@ import (
 
 	"github.com/gorilla/mux"
 	"guthub.com/iribuda/todo-api-go/pkg/models"
+	"guthub.com/iribuda/todo-api-go/pkg/services/auth"
 	"guthub.com/iribuda/todo-api-go/pkg/utils"
 )
 
 type TaskController struct{
-	repository models.TaskRepository
+	taskRepository models.TaskRepository
+	userRepository models.UserRepository
 }
 
-func NewController(repository models.TaskRepository) *TaskController{
-	return &TaskController{repository: repository}
+func NewController(taskRepository models.TaskRepository, userRepository models.UserRepository) *TaskController{
+	return &TaskController{taskRepository: taskRepository, userRepository: userRepository}
 }
 
 func (tc *TaskController) RegisterRoutes(router *mux.Router){
-	router.HandleFunc("/tasks", tc.handleGetAllTasks)
+	router.HandleFunc("/tasks", auth.WithJWTAuth(tc.handleGetAllTasks, tc.userRepository))
 	router.HandleFunc("/task", tc.handleCreateTask).Methods("POST")
 	router.HandleFunc("/task/{id}", tc.handleGetTaskById).Methods("GET")
 	router.HandleFunc("/task/{id}", tc.handleDeleteTask).Methods("DELETE")
@@ -41,7 +43,7 @@ func (tc *TaskController) handleDeleteTask(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = tc.repository.DeleteTask(taskId)
+	err = tc.taskRepository.DeleteTask(taskId)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -70,7 +72,7 @@ func (tc *TaskController) handleUpdateTask(w http.ResponseWriter, r *http.Reques
 	
 	task := taskDTO.ToModel()
 	task.TaskID = taskId
-	err = tc.repository.UpdateTask(task)
+	err = tc.taskRepository.UpdateTask(task)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -87,7 +89,7 @@ func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Reques
 	}
 	
 	task := taskDTO.ToModel()
-	err := tc.repository.CreateTask(task)
+	err := tc.taskRepository.CreateTask(task)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -110,7 +112,7 @@ func (tc *TaskController) handleGetTaskById(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	task, err := tc.repository.GetTaskByID(taskId)
+	task, err := tc.taskRepository.GetTaskByID(taskId)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -120,7 +122,9 @@ func (tc *TaskController) handleGetTaskById(w http.ResponseWriter, r *http.Reque
 }
 
 func (tc *TaskController) handleGetAllTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := tc.repository.GetTasks()
+	userID := auth.GetUserIDFromContext(r.Context())
+	fmt.Printf("ID: %v", userID)
+	tasks, err := tc.taskRepository.GetTasksByUser(userID)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
