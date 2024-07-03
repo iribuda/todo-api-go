@@ -80,8 +80,8 @@ func (tr *TaskRepositoryImpl) CreateTask(task *models.Task) error{
 	return nil
 }
 
-func (tr *TaskRepositoryImpl) DeleteTask(task *models.Task) error{
-	_, err := tr.db.Exec("DELETE task WHERE taskId = ?", task.TaskID)
+func (tr *TaskRepositoryImpl) DeleteTask(id int) error{
+	_, err := tr.db.Exec("DELETE FROM task WHERE taskId = ?", id)
 	if err != nil{
 		return err
 	}
