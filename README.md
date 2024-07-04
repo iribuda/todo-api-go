@@ -51,33 +51,33 @@ Dies ist eine sichere ToDo List – API, auf der ein Frontend aufgebaut werden k
 ### ToDos
 - **GET /tasks**
   - Beschreibung: Alle Aufgaben des eingeloggten Nutzers abrufen.
-  - Header: `Authorization: Bearer <token>`
+  - Header: `Authorization: <token>`
   - Antwort: `[{ id, title, text, deadline, categoryId, category, done }]`
 
 - **POST /tasks**
   - Beschreibung: Eine neue Aufgabe erstellen.
-  - Header: `Authorization: Bearer <token>`
+  - Header: `Authorization: <token>`
   - Nutzerdaten: `{ title, text }`
   - Antwort: `{ id, title, text, deadline, categoryId, category, done }`
 
 - **PUT /tasks/:id**
   - Beschreibung: Eine bestehende Aufgabe aktualisieren.
-  - Header: `Authorization: Bearer <token>`
+  - Header: `Authorization: <token>`
   - Nutzerdaten: `{ title, text, deadline, categoryId, category }`
   - Antwort: `{ id, title, text, deadline, categoryId, category, done }`
 
 - **DELETE /tasks/:id**
   - Beschreibung: Eine Aufgabe löschen.
-  - Header: `Authorization: Bearer <token>`
+  - Header: `Authorization: <token>`
   - Antwort: `{ message: 'Task deleted successfully' }`
 
 - **POST /tasks/:id/complete**
   - Beschreibung: Eine Aufgabe als erledigt markieren.
-  - Header: `Authorization: Bearer <token>`
+  - Header: `Authorization: <token>`
   - Antwort: `{ id, title, text, deadline, categoryId, category, done }`
 
 - **POST /tasks/:id/share**
   - Beschreibung:Eine Aufgabe mit einem anderen Nutzer teilen.
-  - Header: `Authorization: Bearer <token>`
+  - Header: `Authorization: <token>`
   - Nutzerdaten: `{ sharedUserID   }`
   - Antwort: `{ message: 'Task shared successfully' }`
