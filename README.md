@@ -65,17 +65,17 @@ Dies ist eine sichere ToDo List – API, auf der ein Frontend aufgebaut werden k
   - Nutzerdaten: `{ title, text, deadline, categoryId, category }`
   - Antwort: `{ id, title, text, deadline, categoryId, category, done }`
 
-- **DELETE /todos/:id**
+- **DELETE /tasks/:id**
   - Beschreibung: Eine Aufgabe löschen.
   - Header: `Authorization: Bearer <token>`
   - Antwort: `{ message: 'Task deleted successfully' }`
 
-- **POST /todos/:id/complete**
+- **POST /tasks/:id/complete**
   - Beschreibung: Eine Aufgabe als erledigt markieren.
   - Header: `Authorization: Bearer <token>`
   - Antwort: `{ id, title, text, deadline, categoryId, category, done }`
 
-- **POST /todos/:id/share**
+- **POST /tasks/:id/share**
   - Beschreibung:Eine Aufgabe mit einem anderen Nutzer teilen.
   - Header: `Authorization: Bearer <token>`
   - Nutzerdaten: `{ sharedUserID   }`
