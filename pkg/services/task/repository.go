@@ -91,6 +91,15 @@ func (tr *TaskRepositoryImpl) DeleteTask(taskID int, userID int) error{
 	return nil
 }
 
+func (tr *TaskRepositoryImpl) ShareTask(taskID int, userID int, sharedUserID int) error{
+	_, err := tr.db.Exec("INSERT INTO user_task (userId, taskId) VALUES (?, ?) ", sharedUserID, taskID)
+	if err != nil{
+		fmt.Printf("create task %v", err)
+		return err
+	}
+	return nil
+}
+
 // Hilf-Funktion für Aufrufen der Aufgaben aus sql-ResultSet
 func scanRowsIntoTask(rows *sql.Rows)(*models.TaskDTO, error){
 	task := new(models.TaskDTO)

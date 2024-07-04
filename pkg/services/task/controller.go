@@ -2,6 +2,7 @@ package task
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -27,6 +28,7 @@ func (tc *TaskController) RegisterRoutes(router *mux.Router){
 	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleGetTaskById, tc.userRepository)).Methods("GET")
 	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleDeleteTask, tc.userRepository)).Methods("DELETE")
 	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleUpdateTask, tc.userRepository)).Methods("PUT")
+	router.HandleFunc("/task/{id}/share", auth.WithJWTAuth(tc.handleShareTask, tc.userRepository)).Methods("POST")
 }
 
 func (tc *TaskController) handleDeleteTask(w http.ResponseWriter, r *http.Request){
@@ -134,4 +136,40 @@ func (tc *TaskController) handleGetAllTasks(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	utils.WriteJSON(w, http.StatusOK, tasks)
+}
+
+func (tc* TaskController) handleShareTask(w http.ResponseWriter, r *http.Request){
+	userID := auth.GetUserIDFromContext(r.Context())
+	vars := mux.Vars(r)
+	str, ok := vars["id"]
+	if !ok{
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing task with ID %v", str))
+		return
+	}
+
+	taskId, err := strconv.Atoi(str)
+	if err != nil{
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid taskId"))
+		return
+	}
+
+	var requestBody struct {
+        SharedUserID string `json:"sharedUserID"`
+    }
+	
+    if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+        utils.WriteError(w, http.StatusBadRequest, err)
+        return
+    }
+
+	sharesUserID, _ := strconv.Atoi(requestBody.SharedUserID)
+
+	err = tc.taskRepository.ShareTask(taskId, userID, sharesUserID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]string{"message": "Task shared successfully."})
 }
