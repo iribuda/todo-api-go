@@ -10,6 +10,7 @@ type CategoryRepositoryImpl struct{
 	db *sql.DB
 }
 
+// Konstruktor
 func NewRepository(db *sql.DB) *CategoryRepositoryImpl{
 	return &CategoryRepositoryImpl{db: db}
 }

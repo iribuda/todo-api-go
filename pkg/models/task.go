@@ -5,38 +5,27 @@ import (
 	"time"
 )
 
-// DTO ist notwendig, die Daten zu formatieren
+// DTO ist notwendig, die Daten zu formatieren und vollständige Information für Frontend zu liefern
 type TaskDTO struct {
 	ID         string `json:"id"`
 	Title      string `json:"title"`
 	Text       string `json:"text"`
 	Deadline   string `json:"deadline"`
 	CategoryID string `json:"categoryId"`
-	Category 	string	`json:"category"`
+	Category   string `json:"category"`
 	Done       bool   `json:"done"`
 }
 
 type Task struct {
 	TaskID     int
 	Title      string
-	Text       string    
-	Deadline   time.Time 
-	CategoryID int       
-	Done       bool     
+	Text       string
+	Deadline   time.Time
+	CategoryID int
+	Done       bool
 }
 
-// func (task *Task) ToDto() TaskDTO {
-// 	return TaskDTO{
-// 		// ID:         strconv.Itoa(task.TaskID),
-// 		Title:      task.Title,
-// 		Text:       task.Text,
-// 		Deadline:   task.Deadline.Format("2006-01-02"),
-// 		CategoryID: strconv.Itoa(task.CategoryID),
-// 		Category: task.c,
-// 		Done:       task.Done,
-// 	}
-// }
-
+// Umwandlung von TaskDTO zu Task-Model
 func (t *TaskDTO) ToModel() *Task {
 	deadline, _ := time.Parse("2006-01-02", t.Deadline)
 	categoryId, _ := strconv.Atoi(t.CategoryID)

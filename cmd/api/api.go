@@ -28,6 +28,8 @@ func NewAPIServer(addr string, db *sql.DB) *APIServer{
 func (s *APIServer) Run() error{
 	router := mux.NewRouter()
 
+	// Erstellen von Repositories und Controllers
+	// Dependency Injection
 	userRepository := user.NewRepository(s.db)
 	userController := user.NewController(userRepository)
 	userController.RegisterRoutes(router)
