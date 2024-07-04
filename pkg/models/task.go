@@ -12,6 +12,7 @@ type TaskDTO struct {
 	Text       string `json:"text"`
 	Deadline   string `json:"deadline"`
 	CategoryID string `json:"categoryId"`
+	Category 	string	`json:"category"`
 	Done       bool   `json:"done"`
 }
 
@@ -24,16 +25,17 @@ type Task struct {
 	Done       bool     
 }
 
-func (task *Task) ToDto() *TaskDTO {
-	return &TaskDTO{
-		ID:         strconv.Itoa(task.TaskID),
-		Title:      task.Title,
-		Text:       task.Text,
-		Deadline:   task.Deadline.Format("2006-01-02"),
-		CategoryID: strconv.Itoa(task.CategoryID),
-		Done:       task.Done,
-	}
-}
+// func (task *Task) ToDto() TaskDTO {
+// 	return TaskDTO{
+// 		// ID:         strconv.Itoa(task.TaskID),
+// 		Title:      task.Title,
+// 		Text:       task.Text,
+// 		Deadline:   task.Deadline.Format("2006-01-02"),
+// 		CategoryID: strconv.Itoa(task.CategoryID),
+// 		Category: task.c,
+// 		Done:       task.Done,
+// 	}
+// }
 
 func (t *TaskDTO) ToModel() *Task {
 	deadline, _ := time.Parse("2006-01-02", t.Deadline)
@@ -50,10 +52,9 @@ func (t *TaskDTO) ToModel() *Task {
 
 // Repository-Schnittstelle
 type TaskRepository interface {
-	GetTasks() ([]*Task, error)
-	GetTaskByID(id int) (*Task, error)
-	GetTasksByUser(id int) ([]*Task, error)
-	UpdateTask(*Task) error
-	CreateTask(*Task) error
-	DeleteTask(id int) error
+	GetTaskByIDAndByUser(taskId, userId int) (*TaskDTO, error)
+	GetTasksByUser(id int) ([]*TaskDTO, error)
+	UpdateTask(*Task, int) error
+	CreateTask(*Task, int) error
+	DeleteTask(taskId int, userId int) error
 }

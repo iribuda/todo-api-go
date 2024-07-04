@@ -23,13 +23,14 @@ func NewController(taskRepository models.TaskRepository, userRepository models.U
 
 func (tc *TaskController) RegisterRoutes(router *mux.Router){
 	router.HandleFunc("/tasks", auth.WithJWTAuth(tc.handleGetAllTasks, tc.userRepository))
-	router.HandleFunc("/task", tc.handleCreateTask).Methods("POST")
-	router.HandleFunc("/task/{id}", tc.handleGetTaskById).Methods("GET")
-	router.HandleFunc("/task/{id}", tc.handleDeleteTask).Methods("DELETE")
-	router.HandleFunc("/task/{id}", tc.handleUpdateTask).Methods("PUT")
+	router.HandleFunc("/task", auth.WithJWTAuth(tc.handleCreateTask, tc.userRepository)).Methods("POST")
+	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleGetTaskById, tc.userRepository)).Methods("GET")
+	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleDeleteTask, tc.userRepository)).Methods("DELETE")
+	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleUpdateTask, tc.userRepository)).Methods("PUT")
 }
 
 func (tc *TaskController) handleDeleteTask(w http.ResponseWriter, r *http.Request){
+	userID := auth.GetUserIDFromContext(r.Context())
 	vars := mux.Vars(r)
 	str, ok := vars["id"]
 	if !ok{
@@ -43,7 +44,7 @@ func (tc *TaskController) handleDeleteTask(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = tc.taskRepository.DeleteTask(taskId)
+	err = tc.taskRepository.DeleteTask(taskId, userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -51,6 +52,7 @@ func (tc *TaskController) handleDeleteTask(w http.ResponseWriter, r *http.Reques
 }
 
 func (tc *TaskController) handleUpdateTask(w http.ResponseWriter, r *http.Request){
+	userID := auth.GetUserIDFromContext(r.Context())
 	vars := mux.Vars(r)
 	str, ok := vars["id"]
 	if !ok{
@@ -72,7 +74,7 @@ func (tc *TaskController) handleUpdateTask(w http.ResponseWriter, r *http.Reques
 	
 	task := taskDTO.ToModel()
 	task.TaskID = taskId
-	err = tc.taskRepository.UpdateTask(task)
+	err = tc.taskRepository.UpdateTask(task, userID)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -82,6 +84,7 @@ func (tc *TaskController) handleUpdateTask(w http.ResponseWriter, r *http.Reques
 }
 
 func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Request) {
+	userID := auth.GetUserIDFromContext(r.Context())
 	var taskDTO models.TaskDTO
 	if err := utils.ParseJSON(r, &taskDTO); err != nil{
 		utils.WriteError(w, http.StatusBadRequest, err)
@@ -89,7 +92,7 @@ func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Reques
 	}
 	
 	task := taskDTO.ToModel()
-	err := tc.taskRepository.CreateTask(task)
+	err := tc.taskRepository.CreateTask(task, userID)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -99,6 +102,7 @@ func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Reques
 }
 
 func (tc *TaskController) handleGetTaskById(w http.ResponseWriter, r *http.Request) {
+	userID := auth.GetUserIDFromContext(r.Context())
 	vars := mux.Vars(r)
 	str, ok := vars["id"]
 	if !ok{
@@ -112,7 +116,7 @@ func (tc *TaskController) handleGetTaskById(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	task, err := tc.taskRepository.GetTaskByID(taskId)
+	task, err := tc.taskRepository.GetTaskByIDAndByUser(taskId, userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
