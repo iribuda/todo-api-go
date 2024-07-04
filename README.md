@@ -36,6 +36,7 @@ Dies ist eine sichere ToDo List – API, auf der ein Frontend aufgebaut werden k
 ```
 
 ## API Endpunkte
+[Postman Collection](https://www.postman.com/descent-module-geoscientist-24846769/workspace/public/collection/18343508-4db2a613-28e9-49db-8ce5-b2ecf41b4b17?action=share&creator=18343508)
 
 ### Registrierung
 - **POST /register**
