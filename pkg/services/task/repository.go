@@ -3,11 +3,13 @@ package task
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	"guthub.com/iribuda/todo-api-go/pkg/models"
 )
 
 // Implementierung der TaskRepository-Schnittstelle
-// In jeder Funktion wird in SQL-Query durch JOIN sichergestellt, 
+// In jeder Funktion wird in SQL-Query durch JOIN sichergestellt,
 // dass Benutzer nur mit seinen Aufgaben arbeitet
 type TaskRepositoryImpl struct{
 	db *sql.DB
@@ -98,6 +100,7 @@ func (tr *TaskRepositoryImpl) CreateTask(task *models.Task, userID int) error{
 	_, err := tr.db.Exec("INSERT INTO `task` (title, text, deadline, categoryId) VALUES (?, ?, ?, ?);",
 		task.Title, task.Text, task.Deadline, task.CategoryID)
 		if err != nil{
+			log.Fatal(err)
 			return err
 		}
 
@@ -105,6 +108,7 @@ func (tr *TaskRepositoryImpl) CreateTask(task *models.Task, userID int) error{
 	// d.h. wird sie dem aktuellen Benutzer zugewiesen
 	_, err = tr.db.Exec("INSERT INTO user_task (userId, taskId) VALUES (?, (SELECT LAST_INSERT_ID())) ", userID)
 	if err != nil{
+		// log.Fatal("create task %v", err)
 		fmt.Printf("create task %v", err)
 		return err
 	}

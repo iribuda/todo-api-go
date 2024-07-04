@@ -4,6 +4,9 @@ import (
 	// "encoding/json"
 	"encoding/json"
 	"fmt"
+	// "log"
+
+	// "log"
 	"net/http"
 	"strconv"
 
@@ -28,7 +31,7 @@ func NewController(taskRepository models.TaskRepository, userRepository models.U
 // Vor jedem Handler wird die auth.WithJWTAuth() aufgerufen, damit nur angemeldete Benutzer mit laufendem Token 
 // mit nur seinen Aufgaben arbeiten können. 
 func (tc *TaskController) RegisterRoutes(router *mux.Router){
-	router.HandleFunc("/tasks", auth.WithJWTAuth(tc.handleGetAllTasks, tc.userRepository))
+	router.HandleFunc("/tasks", auth.WithJWTAuth(tc.handleGetAllTasks, tc.userRepository)).Methods("GET")
 	router.HandleFunc("/tasks", auth.WithJWTAuth(tc.handleCreateTask, tc.userRepository)).Methods("POST")
 	router.HandleFunc("/tasks/{id}", auth.WithJWTAuth(tc.handleGetTaskById, tc.userRepository)).Methods("GET")
 	router.HandleFunc("/tasks/{id}", auth.WithJWTAuth(tc.handleDeleteTask, tc.userRepository)).Methods("DELETE")
@@ -141,6 +144,7 @@ func (tc *TaskController) handleCompleteTask (w http.ResponseWriter, r *http.Req
 
 // Handler für Erstellen der Aufgabe
 func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Request) {
+	// log.Println("handleCreateTask ...")
 	// Abrufen aus dem Context
 	userID := auth.GetUserIDFromContext(r.Context())
 
@@ -150,6 +154,7 @@ func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Reques
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+	// log.Printf("TaskDTO: %v\n", taskDTO)
 	
 	task := taskDTO.ToModel()
 
