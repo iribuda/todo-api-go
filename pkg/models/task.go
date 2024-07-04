@@ -44,6 +44,7 @@ type TaskRepository interface {
 	GetTaskByIDAndByUser(taskId, userId int) (*TaskDTO, error)
 	GetTasksByUser(id int) ([]*TaskDTO, error)
 	UpdateTask(*Task, int) error
+	CompleteTask(int, int) error
 	CreateTask(*Task, int) error
 	ShareTask(int, int, int) error
 	DeleteTask(taskId int, userId int) error

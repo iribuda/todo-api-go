@@ -29,11 +29,12 @@ func NewController(taskRepository models.TaskRepository, userRepository models.U
 // mit nur seinen Aufgaben arbeiten können. 
 func (tc *TaskController) RegisterRoutes(router *mux.Router){
 	router.HandleFunc("/tasks", auth.WithJWTAuth(tc.handleGetAllTasks, tc.userRepository))
-	router.HandleFunc("/task", auth.WithJWTAuth(tc.handleCreateTask, tc.userRepository)).Methods("POST")
-	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleGetTaskById, tc.userRepository)).Methods("GET")
-	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleDeleteTask, tc.userRepository)).Methods("DELETE")
-	router.HandleFunc("/task/{id}", auth.WithJWTAuth(tc.handleUpdateTask, tc.userRepository)).Methods("PUT")
-	router.HandleFunc("/task/{id}/share", auth.WithJWTAuth(tc.handleShareTask, tc.userRepository)).Methods("POST")
+	router.HandleFunc("/tasks", auth.WithJWTAuth(tc.handleCreateTask, tc.userRepository)).Methods("POST")
+	router.HandleFunc("/tasks/{id}", auth.WithJWTAuth(tc.handleGetTaskById, tc.userRepository)).Methods("GET")
+	router.HandleFunc("/tasks/{id}", auth.WithJWTAuth(tc.handleDeleteTask, tc.userRepository)).Methods("DELETE")
+	router.HandleFunc("/tasks/{id}", auth.WithJWTAuth(tc.handleUpdateTask, tc.userRepository)).Methods("PUT")
+	router.HandleFunc("/tasks/{id}/complete", auth.WithJWTAuth(tc.handleCompleteTask, tc.userRepository)).Methods("PUT")
+	router.HandleFunc("/tasks/{id}/share", auth.WithJWTAuth(tc.handleShareTask, tc.userRepository)).Methods("POST")
 }
 
 // Handler für Löschen der Aufgabe
@@ -97,15 +98,45 @@ func (tc *TaskController) handleUpdateTask(w http.ResponseWriter, r *http.Reques
 	task := taskDTO.ToModel()
 	task.TaskID = taskId
 
-	// Abruden der Löschen-Funktion im Repository
+	// Abrufen der Löschen-Funktion im Repository
 	err = tc.taskRepository.UpdateTask(task, userID)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
+	utils.WriteJSON(w, http.StatusOK, task)
+}
+
+// Handler für Erledigen der Aufgabe
+func (tc *TaskController) handleCompleteTask (w http.ResponseWriter, r *http.Request){
+	// Abrufen aus dem Context
+	userID := auth.GetUserIDFromContext(r.Context())
+
+	// Abrufen der ID der zu löschenden Aufgabe
+	vars := mux.Vars(r)
+	str, ok := vars["id"]
+	if !ok{
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing task with ID %v", str))
+		return
+	}
+
+	// Umwandeln zu int
+	taskId, err := strconv.Atoi(str)
+	if err != nil{
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid taskId"))
+		return
+	}
+
+	// Abrufen der Löschen-Funktion im Repository
+	err = tc.taskRepository.CompleteTask(taskId, userID)
+	if err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(map[string]string{"message": "Task updated successfully."})
+    json.NewEncoder(w).Encode(map[string]string{"message": "Task completed successfully."})
 }
 
 // Handler für Erstellen der Aufgabe
@@ -129,8 +160,7 @@ func (tc *TaskController) handleCreateTask(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(map[string]string{"message": "Task created successfully."})
+	utils.WriteJSON(w, http.StatusOK, task)
 }
 
 // Handler für das Lesen einer bestimmten Aufgabe

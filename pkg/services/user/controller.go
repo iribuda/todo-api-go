@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -109,5 +110,6 @@ func (uc *UserController) handleRegister(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, nil)
+    json.NewEncoder(w).Encode(map[string]string{"message": "Registered successfully"})
+
 }

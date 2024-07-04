@@ -1,3 +1,6 @@
+CREATE DATABASE todo_list;
+USE todo_list;
+
 CREATE TABLE category (
   categoryId int PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL

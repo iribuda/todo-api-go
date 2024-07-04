@@ -81,6 +81,17 @@ func (tr *TaskRepositoryImpl) UpdateTask(task *models.Task, userID int) error{
 	return nil
 }
 
+// Bearbeiten der dem Benutzer gehörigen Aufgabe
+func (tr *TaskRepositoryImpl) CompleteTask(taskID, userID int) error{
+	// SQL Query, die dem Benutzer gehörigen Aufgabe entspechend als erledigt markiert
+	_, err := tr.db.Exec("UPDATE task t JOIN user_task ut ON t.taskId = ut.taskId SET done = 1 WHERE t.taskId = ? && ut.userID = ? ", 
+		taskID, userID)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
 // Speichern der Aufgabe
 func (tr *TaskRepositoryImpl) CreateTask(task *models.Task, userID int) error{
 	// Zuerst wird die Aufgabe selbst gespeichert
