@@ -81,3 +81,7 @@ Dies ist eine sichere ToDo List – API, auf der ein Frontend aufgebaut werden k
   - Header: `Authorization: <token>`
   - Nutzerdaten: `{ sharedUserID   }`
   - Antwort: `{ message: 'Task shared successfully' }`
+ 
+
+## Datenbank
+![image](https://github.com/iribuda/todo-api-go/assets/87514795/95b0d74d-3de9-4062-8792-cf5b13a7960c)
